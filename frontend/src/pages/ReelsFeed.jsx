@@ -85,11 +85,15 @@ const ReelsFeed = () => {
     }
   }, []);
 
-  // Load more when scrolling to bottom
+  // Load more when scrolling to bottom with throttling
   useEffect(() => {
-    if (inView && hasMore && !loading) {
-      loadReels(page + 1, true);
-    }
+    const timer = setTimeout(() => {
+      if (inView && hasMore && !loading) {
+        loadReels(page + 1, true);
+      }
+    }, 100); // Throttle to prevent excessive API calls
+
+    return () => clearTimeout(timer);
   }, [inView, hasMore, loading, page, loadReels]);
 
   const handleReelUpdate = useCallback((updatedReel) => {
@@ -108,21 +112,27 @@ const ReelsFeed = () => {
 
   if (error && reels.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-center text-white px-6">
-          <div className="mb-4">
-            <AlertCircle className="h-16 w-16 text-gray-600 mx-auto" />
+      <div className="min-h-screen bg-black">
+        {/* App Header */}
+        <AppHeader />
+        
+        {/* Error State Content */}
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center text-white px-6">
+            <div className="mb-4">
+              <AlertCircle className="h-16 w-16 text-gray-600 mx-auto" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">
+              Oops! Something went wrong
+            </h2>
+            <p className="text-gray-300 mb-4">{error}</p>
+            <button
+              onClick={refreshFeed}
+              className="px-6 py-3 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-600 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
-          <h2 className="text-xl font-semibold mb-2">
-            Oops! Something went wrong
-          </h2>
-          <p className="text-gray-300 mb-4">{error}</p>
-          <button
-            onClick={refreshFeed}
-            className="px-6 py-3 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-600 transition-colors"
-          >
-            Try Again
-          </button>
         </div>
       </div>
     );
@@ -158,32 +168,38 @@ const ReelsFeed = () => {
 
   if (!loading && reels.length === 0) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center text-white px-6"
-        >
-          <div className="mb-6">
-            <h1 className="brand-title text-5xl mb-4">Vestira</h1>
-            <p className="brand-tagline mb-8">Runway to Your Wardrobe</p>
-          </div>
-          <div className="mb-4">
-            <Video className="h-16 w-16 text-gray-600 mx-auto" />
-          </div>
-          <h2 className="text-2xl font-semibold mb-2 font-heading">
-            No reels yet
-          </h2>
-          <p className="text-gray-300 mb-4 font-body">
-            Check back later for amazing fashion content!
-          </p>
-          <button
-            onClick={refreshFeed}
-            className="btn-primary"
+      <div className="min-h-screen bg-black">
+        {/* App Header */}
+        <AppHeader />
+        
+        {/* Empty State Content */}
+        <div className="flex items-center justify-center min-h-screen">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center text-white px-6"
           >
-            Refresh
-          </button>
-        </motion.div>
+            <div className="mb-6">
+              <h1 className="brand-title text-5xl mb-4">Vestira</h1>
+              <p className="brand-tagline mb-8">Runway to Your Wardrobe</p>
+            </div>
+            <div className="mb-4">
+              <Video className="h-16 w-16 text-gray-600 mx-auto" />
+            </div>
+            <h2 className="text-2xl font-semibold mb-2 font-heading">
+              No reels yet
+            </h2>
+            <p className="text-gray-300 mb-4 font-body">
+              Check back later for amazing fashion content!
+            </p>
+            <button
+              onClick={refreshFeed}
+              className="btn-primary"
+            >
+              Refresh
+            </button>
+          </motion.div>
+        </div>
       </div>
     );
   }

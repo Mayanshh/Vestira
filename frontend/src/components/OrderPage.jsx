@@ -92,18 +92,20 @@ const OrderPage = ({ reel, onClose, onOrderComplete }) => {
   };
 
   return (
-    <AnimatePresence>
+    <>
+      {/* Confetti should be outside the modal to ensure proper z-index stacking */}
       <ConfettiEffect 
         isActive={showConfetti} 
         onComplete={() => setShowConfetti(false)} 
       />
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-md z-50 flex items-center justify-center p-4"
-        onClick={(e) => e.target === e.currentTarget && !isLoading && handleClose()}
-      >
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          onClick={(e) => e.target === e.currentTarget && !isLoading && handleClose()}
+        >
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -222,7 +224,7 @@ const OrderPage = ({ reel, onClose, onOrderComplete }) => {
                   type="text"
                   value={orderData.customerInfo.name}
                   onChange={(e) => handleInputChange('customerInfo.name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-500"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -235,7 +237,7 @@ const OrderPage = ({ reel, onClose, onOrderComplete }) => {
                   type="email"
                   value={orderData.customerInfo.email}
                   onChange={(e) => handleInputChange('customerInfo.email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-500"
                   placeholder="Enter your email"
                 />
               </div>
@@ -248,7 +250,7 @@ const OrderPage = ({ reel, onClose, onOrderComplete }) => {
                   type="tel"
                   value={orderData.customerInfo.phone}
                   onChange={(e) => handleInputChange('customerInfo.phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-500"
                   placeholder="Enter your phone number"
                 />
               </div>
@@ -260,7 +262,7 @@ const OrderPage = ({ reel, onClose, onOrderComplete }) => {
                 <textarea
                   value={orderData.customerInfo.address}
                   onChange={(e) => handleInputChange('customerInfo.address', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-500"
                   rows="2"
                   placeholder="Enter your address (optional)"
                 />
@@ -275,7 +277,7 @@ const OrderPage = ({ reel, onClose, onOrderComplete }) => {
               <textarea
                 value={orderData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-500"
                 rows="2"
                 placeholder="Any special requests or instructions (optional)"
               />
@@ -333,8 +335,9 @@ const OrderPage = ({ reel, onClose, onOrderComplete }) => {
             </div>
           </div>
         </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </motion.div>
+      </AnimatePresence>
+    </>
   );
 };
 

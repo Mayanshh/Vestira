@@ -13,7 +13,7 @@ const ConfettiEffect = ({ isActive, onComplete }) => {
       vy: Math.random() * 8 + 2,
       gravity: 0.3,
       life: 1,
-      decay: Math.random() * 0.02 + 0.005,
+      decay: Math.random() * 0.008 + 0.003, // Slower decay for longer visibility
       size: Math.random() * 8 + 4,
       color: `hsl(${Math.random() * 360}, 80%, 60%)`,
       rotation: Math.random() * Math.PI * 2,
@@ -88,7 +88,7 @@ const ConfettiEffect = ({ isActive, onComplete }) => {
 
   const startConfetti = useCallback(() => {
     // Create burst of particles
-    const particleCount = 60;
+    const particleCount = 120; // More particles for better effect
     for (let i = 0; i < particleCount; i++) {
       particlesRef.current.push(createParticle());
     }
@@ -136,8 +136,17 @@ const ConfettiEffect = ({ isActive, onComplete }) => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[200]"
-      style={{ mixBlendMode: 'screen' }}
+      className="fixed inset-0 pointer-events-none"
+      style={{ 
+        mixBlendMode: 'normal',
+        zIndex: 99999, // Even higher z-index to ensure visibility
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        pointerEvents: 'none'
+      }}
     />
   );
 };

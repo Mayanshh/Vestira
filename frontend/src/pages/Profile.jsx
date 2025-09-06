@@ -5,7 +5,7 @@ import ReelCard from '../components/ReelCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AppHeader from '../components/AppHeader';
 import AppFooter from '../components/AppFooter';
-import { User, Heart, Bookmark, Grid, Film, LogOut, Upload, Edit3, TrendingUp, ShoppingBag, DollarSign, Eye, Plus, Settings, BarChart3, Home, Package } from 'lucide-react';
+import { User, Heart, Bookmark, Grid, Film, LogOut, Upload, Edit3, TrendingUp, ShoppingBag, DollarSign, Eye, Plus, Settings, BarChart3, Home, Package, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -30,6 +30,8 @@ const PartnerProfile = ({ user, onLogout }) => {
     price: ''
   });
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStage, setUploadStage] = useState('');
 
   useEffect(() => {
     fetchPartnerData();
@@ -106,19 +108,47 @@ const PartnerProfile = ({ user, onLogout }) => {
 
     try {
       setIsUploading(true);
+      setUploadProgress(0);
+      setUploadStage('Validating video...');
       
       // Validate video first
       await validateVideo(uploadForm.video);
+      setUploadProgress(15);
       
       // Show progress toast
       const uploadToast = toast.loading('Preparing video for upload...');
+      setUploadStage('Reading video file...');
+      setUploadProgress(20);
       
       const fileReader = new FileReader();
+      
+      fileReader.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const progress = Math.min(20 + (e.loaded / e.total) * 20, 40);
+          setUploadProgress(progress);
+        }
+      };
+      
       fileReader.onload = async (e) => {
         try {
+          setUploadProgress(45);
+          setUploadStage('Processing video...');
           toast.loading('Uploading your reel...', { id: uploadToast });
           
           const base64Video = e.target.result;
+          
+          // Simulate upload progress
+          const progressInterval = setInterval(() => {
+            setUploadProgress(prev => {
+              if (prev < 85) {
+                return prev + 2;
+              }
+              clearInterval(progressInterval); // Prevent memory leak
+              return prev;
+            });
+          }, 200);
+          
+          setUploadStage('Uploading to server...');
           
           // Create a timeout for the upload
           const uploadPromise = reelsAPI.uploadReel({
@@ -133,6 +163,16 @@ const PartnerProfile = ({ user, onLogout }) => {
           
           await Promise.race([uploadPromise, timeoutPromise]);
           
+          clearInterval(progressInterval);
+          setUploadProgress(95);
+          setUploadStage('Finalizing...');
+          
+          // Small delay for finalization
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          setUploadProgress(100);
+          setUploadStage('Upload complete!');
+          
           toast.success('Reel uploaded successfully!', { id: uploadToast });
           setUploadForm({ video: null, caption: '', price: '' });
           
@@ -145,6 +185,9 @@ const PartnerProfile = ({ user, onLogout }) => {
           
         } catch (error) {
           console.error('Error uploading reel:', error);
+          
+          // Clear progress interval on error
+          clearInterval(progressInterval);
           
           let message = 'Failed to upload reel';
           
@@ -163,12 +206,16 @@ const PartnerProfile = ({ user, onLogout }) => {
           toast.error(message, { id: uploadToast });
         } finally {
           setIsUploading(false);
+          setUploadProgress(0);
+          setUploadStage('');
         }
       };
       
       fileReader.onerror = () => {
         toast.error('Failed to read video file. Please try again.');
         setIsUploading(false);
+        setUploadProgress(0);
+        setUploadStage('');
       };
       
       fileReader.readAsDataURL(uploadForm.video);
@@ -177,6 +224,8 @@ const PartnerProfile = ({ user, onLogout }) => {
       console.error('Error processing video:', error);
       toast.error(error.message || 'Failed to process video');
       setIsUploading(false);
+      setUploadProgress(0);
+      setUploadStage('');
     }
   };
 
@@ -190,6 +239,21 @@ const PartnerProfile = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error updating order status:', error);
       toast.error('Failed to update order status');
+    }
+  };
+
+  const handleDeleteReel = async (reelId) => {
+    if (!window.confirm('Are you sure you want to delete this reel? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await partnerAPI.deleteReel(reelId);
+      setMyReels(prev => prev.filter(reel => reel._id !== reelId));
+      toast.success('Reel deleted successfully');
+    } catch (error) {
+      console.error('Error deleting reel:', error);
+      toast.error('Failed to delete reel');
     }
   };
 
@@ -364,7 +428,7 @@ const PartnerProfile = ({ user, onLogout }) => {
                       <video
                         src={reel.videoUrl}
                         className="w-full h-full object-cover"
-                        muted
+                        muted={true} // Start muted to prevent autoplay blocking
                         loop
                         playsInline
                         autoPlay={index < 3} // Autoplay first 3 reels
@@ -385,6 +449,18 @@ const PartnerProfile = ({ user, onLogout }) => {
                       <div className="absolute top-2 right-2 bg-black bg-opacity-60 rounded px-2 py-1">
                         <span className="text-white text-xs">₹{reel.price}</span>
                       </div>
+                      {/* Delete button */}
+                      <div className="absolute top-2 left-2">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleDeleteReel(reel._id)}
+                          className="w-8 h-8 bg-red-600 bg-opacity-80 hover:bg-opacity-100 rounded-full flex items-center justify-center transition-all duration-200"
+                          title="Delete reel"
+                        >
+                          <Trash2 className="w-4 h-4 text-white" />
+                        </motion.button>
+                      </div>
                       {/* Play indicator for non-autoplaying videos */}
                       {index >= 3 && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20">
@@ -402,6 +478,18 @@ const PartnerProfile = ({ user, onLogout }) => {
                         <span>{reel.likes?.length || 0} likes</span>
                         <span>{reel.saves?.length || 0} saves</span>
                         <span className="text-purple-400">{index < 3 ? 'Playing' : 'Preview'}</span>
+                      </div>
+                      {/* Additional delete option in card footer */}
+                      <div className="mt-2">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleDeleteReel(reel._id)}
+                          className="w-full text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20 px-2 py-1 rounded transition-all duration-200 flex items-center justify-center gap-1"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Delete
+                        </motion.button>
                       </div>
                     </div>
                   </motion.div>
@@ -473,22 +561,52 @@ const PartnerProfile = ({ user, onLogout }) => {
                     className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none"
                   />
                 </div>
+                {/* Upload Progress Bar */}
+                {isUploading && (
+                  <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-300">{uploadStage}</span>
+                      <span className="text-sm text-purple-400 font-medium">{Math.round(uploadProgress)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${uploadProgress}%` }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Upload Button */}
                 <button
                   onClick={handleUploadReel}
                   disabled={isUploading || !uploadForm.video || !uploadForm.price}
-                  className="w-full flex items-center justify-center space-x-2 p-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`w-full relative overflow-hidden rounded-xl transition-all duration-300 transform ${
+                    isUploading || !uploadForm.video || !uploadForm.price
+                      ? 'bg-gray-700 cursor-not-allowed opacity-60' 
+                      : 'bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-700 hover:via-purple-600 hover:to-indigo-700 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/25 active:scale-[0.98]'
+                  }`}
                 >
-                  {isUploading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Uploading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4" />
-                      <span>Upload Reel</span>
-                    </>
-                  )}
+                  <div className="flex items-center justify-center space-x-3 px-6 py-4">
+                    {isUploading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span className="font-medium text-white">
+                          {uploadStage || 'Processing...'}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-5 w-5 text-white" />
+                        <span className="font-semibold text-white text-lg">
+                          Upload Reel
+                        </span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                      </>
+                    )}
+                  </div>
                 </button>
               </div>
             </div>

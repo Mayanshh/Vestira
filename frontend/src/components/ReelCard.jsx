@@ -41,8 +41,8 @@ const ReelCard = ({ reel, onUpdate, isActive = false }) => {
     if (!video) return;
 
     if (isActive) {
-      // Ensure audio is enabled and volume is set
-      video.muted = false;
+      // Start muted to avoid browser autoplay restrictions
+      video.muted = true;
       video.volume = 1.0;
       
       const playPromise = video.play();
@@ -50,10 +50,15 @@ const ReelCard = ({ reel, onUpdate, isActive = false }) => {
         playPromise
           .then(() => {
             setIsPlaying(true);
+            // After successful autoplay, unmute after a brief delay
+            setTimeout(() => {
+              if (video && !video.paused && isActive) {
+                video.muted = false;
+              }
+            }, 200);
           })
-          .catch((error) => {
-            // If autoplay fails (browser restrictions), we'll still show play button
-            console.log('Autoplay failed:', error);
+          .catch(() => {
+            // Autoplay blocked - this is normal browser behavior
             setIsPlaying(false);
           });
       }
@@ -240,7 +245,9 @@ const ReelCard = ({ reel, onUpdate, isActive = false }) => {
   };
 
   const handleOrderComplete = () => {
-    toast.success('Thank you! Your order has been placed successfully.');
+    // Order success is already handled by OrderPage component
+    // This avoids duplicate success notifications
+    setShowOrderPage(false);
   };
 
   const handleShare = async () => {
@@ -305,7 +312,7 @@ const ReelCard = ({ reel, onUpdate, isActive = false }) => {
         x5-playsinline="true"
         x5-video-player-type="h5"
         x5-video-player-fullscreen="true"
-        preload="auto"
+        preload="metadata"
         controlsList="nodownload nofullscreen noremoteplaybook"
         disablePictureInPicture
         onPlay={() => setIsPlaying(true)}
@@ -313,6 +320,7 @@ const ReelCard = ({ reel, onUpdate, isActive = false }) => {
         onCanPlay={() => {
           // Ensure video is ready for cross-browser compatibility
           if (videoRef.current && isActive) {
+            videoRef.current.muted = true; // Start muted for autoplay
             videoRef.current.play().catch(() => {});
           }
         }}
