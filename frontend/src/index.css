@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Vestira Brand Colors */
+:root {
+  --vestira-black: #000000;
+  --vestira-white: #F9F9F9;
+  --vestira-gold: #C8A951;
+  --vestira-gold-light: #D4B860;
+  --vestira-gold-dark: #B5994A;
+  --vestira-gray: #6B7280;
+  --vestira-gray-light: #9CA3AF;
+  --vestira-gray-dark: #374151;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    height: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    background-color: var(--vestira-black);
+    color: var(--vestira-white);
+    overflow-x: hidden;
+    height: 100%;
+    touch-action: manipulation;
+  }
+
+  /* Typography System */
+  .font-heading {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Disable zoom on inputs and form elements */
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+  }
+
+  /* Disable double-tap zoom */
+  * {
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  /* Vestira Brand Components */
+  .btn-primary {
+    background-color: var(--vestira-gold);
+    @apply hover:bg-opacity-90 text-black font-medium py-3 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl font-body;
+  }
+  
+  .btn-secondary {
+    background-color: var(--vestira-white);
+    color: var(--vestira-black);
+    @apply hover:bg-opacity-90 font-medium py-3 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg font-body;
+  }
+  
+  .btn-ghost {
+    color: var(--vestira-gray);
+    @apply hover:text-opacity-80 hover:bg-white hover:bg-opacity-10 font-medium py-2 px-4 rounded-lg transition-all duration-200 font-body;
+  }
+  
+  .input-field {
+    background-color: var(--vestira-white);
+    color: var(--vestira-black);
+    @apply w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:border-opacity-50 transition-all duration-200 font-body;
+  }
+  
+  .input-field:focus {
+    border-color: var(--vestira-gold);
+    ring-color: var(--vestira-gold);
+  }
+  
+  .card {
+    background-color: var(--vestira-white);
+    color: var(--vestira-black);
+    @apply rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300;
+  }
+  
+  .loading-spinner {
+    border-color: var(--vestira-gold);
+    @apply animate-spin rounded-full h-8 w-8 border-2 border-opacity-30;
+    border-top-color: var(--vestira-gold);
+  }
+
+  /* Brand Heading Styles */
+  .brand-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--vestira-white);
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
+  }
+
+  .brand-subtitle {
+    font-family: 'Playfair Display', serif;
+    color: var(--vestira-gold);
+    @apply text-lg md:text-xl font-medium tracking-wide;
+  }
+
+  .brand-tagline {
+    font-family: 'Inter', sans-serif;
+    color: var(--vestira-gray-light);
+    @apply text-sm md:text-base font-light tracking-widest uppercase;
+  }
+
+  /* Auth Page Styles */
+  .auth-container {
+    background: linear-gradient(135deg, var(--vestira-black) 0%, #1a1a1a 50%, var(--vestira-black) 100%);
+    @apply min-h-screen flex items-center justify-center p-4;
+  }
+
+  .auth-card {
+    background-color: var(--vestira-white);
+    @apply rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Cross-browser video support */
+  video {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  /* Modern viewport units for consistency */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
+  }
+
+  .h-screen {
+    height: 100vh;
+    height: 100svh;
+    height: 100dvh;
+  }
+
+  .h-full {
+    height: 100%;
+  }
+
+  /* Safari iOS specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    .min-h-screen {
+      min-height: -webkit-fill-available;
+    }
+    .h-screen {
+      height: -webkit-fill-available;
+    }
+  }
+
+}

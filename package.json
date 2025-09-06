@@ -1,0 +1,24 @@
+{
+  "name": "vestira-video-platform",
+  "version": "1.0.0",
+  "description": "Video reel sharing platform with user and partner authentication",
+  "main": "backend/server.js",
+  "engines": {
+    "node": "20.x",
+    "npm": "10.x"
+  },
+  "scripts": {
+    "start": "cd backend && npm start",
+    "build": "npm install && cd backend && npm install && cd ../frontend && npm install && npm run build",
+    "install-deps": "cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "keywords": ["video", "reels", "social", "platform", "fashion"],
+  "author": "",
+  "license": "ISC"
+}
